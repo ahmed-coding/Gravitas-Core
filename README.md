@@ -66,7 +66,7 @@ uvx run "git+https://github.com/ahmed-coding/Gravitas-Core.git@v1.1.0"
 
 ### MCP client config (GitHub direct)
 
-Point your MCP client at the GitHub repo so it runs the server from source.
+**Requires [UV](https://docs.astral.sh/uv/) to be installed and `uvx` in your PATH.** If you see `spawn uvx ENOENT`, use the [localhost config](#run-from-localhost-local-clone) below instead (no uv/uvx needed).
 
 **Cursor** — e.g. `~/.cursor/mcp.json` or `.cursor/mcp.json`:
 
@@ -114,6 +114,73 @@ Point your MCP client at the GitHub repo so it runs the server from source.
 ```
 
 *(Create the venv first: `cd /path/to/Gravitas-Core && uv venv && uv sync`, then use `.venv/bin/python` in `command`.)*
+
+## Run from localhost (local clone)
+
+Use the server from a clone on your machine so you can develop and test without GitHub.
+
+### 1. Clone and install (one time)
+
+```bash
+git clone https://github.com/ahmed-coding/Gravitas-Core.git
+cd Gravitas-Core
+uv sync
+```
+
+*(If you don’t have [UV](https://docs.astral.sh/uv/): `pip install uv` or use `python -m venv .venv && .venv/bin/pip install -e .` and then use `.venv/bin/python` in the configs below.)*
+
+### 2. Run the server in a terminal (optional)
+
+```bash
+cd /path/to/Gravitas-Core
+uv run python -m antigravity_mcp.server
+```
+
+The server uses stdio; your MCP client (Cursor, etc.) will start it automatically when configured.
+
+### 3. MCP config for localhost
+
+**Option A — Use this repo as the Cursor project (recommended)**  
+Open the `Gravitas-Core` folder in Cursor. The project already includes `.cursor/mcp.json` so the **antigravity** MCP server runs from your local clone (no GitHub needed).
+
+**Option B — Use from any project (user-level config)**  
+Copy this into `~/.cursor/mcp.json` and replace `YOUR_PATH` with the full path to your clone (e.g. `/home/ahmed/Desktop/Gravitas-MCP-Core` or `C:\Users\You\Gravitas-Core`):
+
+```json
+{
+  "mcpServers": {
+    "antigravity": {
+      "command": "YOUR_PATH/.venv/bin/python",
+      "args": ["-m", "antigravity_mcp.server"]
+    }
+  }
+}
+```
+
+On Windows use `YOUR_PATH\\.venv\\Scripts\\python.exe` and `"args": ["-m", "antigravity_mcp.server"]`.
+
+**Option C — Use `uv` with project path (no venv path)**  
+If Cursor runs the command with a fixed cwd, you can use:
+
+```json
+{
+  "mcpServers": {
+    "antigravity": {
+      "command": "uv",
+      "args": ["run", "--project", "/path/to/Gravitas-Core", "python", "-m", "antigravity_mcp.server"]
+    }
+  }
+}
+```
+
+Replace `/path/to/Gravitas-Core` with your actual clone path.
+
+## Troubleshooting
+
+| Error | Fix |
+|-------|-----|
+| **`spawn uvx ENOENT`** | Cursor can’t find `uvx`. Either install [UV](https://docs.astral.sh/uv/) and ensure `uvx` is in your PATH, or **use localhost**: open this repo in Cursor (so it uses the project’s `.cursor/mcp.json`) and run `python3 -m venv .venv && .venv/bin/pip install -e .` in the project folder. The project config uses the venv’s Python, so no uv needed. |
+| **Server not starting** | Ensure `.venv` exists: from the project root run `python3 -m venv .venv` then `.venv/bin/pip install -e .` (or `uv sync` if you have uv). |
 
 ## MCP client configuration
 
