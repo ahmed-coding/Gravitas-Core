@@ -1,0 +1,40 @@
+[project]
+name = "Gravitas-Core-MCP"
+version = "1.1.0"
+description = "Production-grade autonomous MCP server: persistent memory, cognitive control, terminal & browser verification"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Gravitas-Core-MCP" }]
+keywords = ["mcp", "model-context-protocol", "ai", "autonomous", "cursor", "claude"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development",
+]
+dependencies = [
+    "mcp>=1.0.0,<3",
+    "playwright>=1.40.0",
+    "anyio>=4.0.0",
+]
+
+[project.scripts]
+Gravitas-Core-MCP = "antigravity_mcp.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["antigravity_mcp"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+]
