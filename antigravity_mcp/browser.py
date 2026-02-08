@@ -18,6 +18,9 @@ from .memory import _tool_result
 # Optional: only load playwright when used
 _playwright = None
 
+# Order: try system Chrome/Edge first so no "playwright install chromium" is required
+_BROWSER_CHANNELS = ["chrome", "msedge", "chromium"]
+
 
 def _get_playwright():
     global _playwright
@@ -26,13 +29,38 @@ def _get_playwright():
             from playwright.async_api import async_playwright
             _playwright = async_playwright
         except ImportError:
-            raise ImportError("playwright is required. Install with: pip install playwright && playwright install chromium")
+            raise ImportError(
+                "playwright is required. Install with: pip install playwright. "
+                "Chrome/Edge already on your system are used when available; otherwise run: playwright install chromium"
+            )
     return _playwright
+
+
+async def _launch_any_available_browser(playwright):
+    """Launch first available browser: system Chrome, Edge, or Playwright Chromium."""
+    pw = playwright
+    last_error = None
+    for channel in _BROWSER_CHANNELS:
+        try:
+            if channel == "chromium":
+                # Playwright's bundled Chromium (may require: playwright install chromium)
+                browser = await pw.chromium.launch(headless=True)
+            else:
+                # System-installed browser (no extra install)
+                browser = await pw.chromium.launch(headless=True, channel=channel)
+            return browser, channel
+        except Exception as e:
+            last_error = e
+            continue
+    raise RuntimeError(
+        "No browser available. Install Chrome/Edge, or run: playwright install chromium"
+    ) from last_error
 
 
 class BrowserEngine:
     """
-    Playwright-based browser automation: navigate, snapshot, screenshot, console errors.
+    Playwright-based browser automation: uses system Chrome/Edge when available,
+    otherwise Playwright's Chromium. No mandatory 'playwright install' if Chrome/Edge exists.
     """
 
     def __init__(self, project_root: str | Path | None = None):
@@ -43,12 +71,13 @@ class BrowserEngine:
         self._context = None
         self._page = None
         self._console_errors: list[str] = []
+        self._browser_channel: str | None = None
 
     async def _ensure_browser(self) -> None:
         if self._browser is None:
             pw = _get_playwright()
             self._pw = await pw().start()
-            self._browser = await self._pw.chromium.launch(headless=True)
+            self._browser, self._browser_channel = await _launch_any_available_browser(self._pw)
             self._context = await self._browser.new_context(
                 viewport={"width": 1280, "height": 720},
                 user_agent="Gravitas-Core-MCP/1.0 (Playwright)",

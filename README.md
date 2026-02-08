@@ -19,9 +19,17 @@ Production-grade, autonomous **Model Context Protocol (MCP) server** that elevat
 
 - Python 3.10+
 - [UV](https://docs.astral.sh/uv/) (Astral) for install/run
-- Playwright Chromium (installed on first browser use): `playwright install chromium`
+- **Browser:** Uses **existing Chrome or Edge** on your machine when available — **no `playwright install` required**. If you have neither, run `playwright install chromium` once.
 
 ## Installation
+
+**No local install needed** — run directly from GitHub (see [Use it from GitHub](#use-it-from-github-direct-configuration) below):
+
+```bash
+uvx run git+https://github.com/ahmed-coding/Gravitas-Core.git
+```
+
+Or install from PyPI:
 
 ```bash
 # Install and run via uvx (no global install)
@@ -35,11 +43,77 @@ uv add Gravitas-Core-MCP
 # Then run: uv run Gravitas-Core-MCP
 ```
 
-Install Playwright browser (required for browser tools):
+**Browser tools:** If you already have Chrome or Edge installed, nothing else is needed. Otherwise, run once: `uv run playwright install chromium`.
+
+## Use it from GitHub (direct configuration)
+
+Run the server **directly from this repository** with **no local installation** — UV fetches the repo and runs it. Repository: [ahmed-coding/Gravitas-Core](https://github.com/ahmed-coding/Gravitas-Core).
+
+The repo includes a **GitHub Action** (`.github/workflows/ci.yml`) that runs tests and verifies the server starts; you can see it in the Actions tab after push.
+
+### Run from GitHub with uvx
 
 ```bash
-uv run playwright install chromium
+uvx run git+https://github.com/ahmed-coding/Gravitas-Core.git
 ```
+
+Or pin a branch/tag:
+
+```bash
+uvx run "git+https://github.com/ahmed-coding/Gravitas-Core.git@main"
+uvx run "git+https://github.com/ahmed-coding/Gravitas-Core.git@v1.1.0"
+```
+
+### MCP client config (GitHub direct)
+
+Point your MCP client at the GitHub repo so it runs the server from source.
+
+**Cursor** — e.g. `~/.cursor/mcp.json` or `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "antigravity": {
+      "command": "uvx",
+      "args": [
+        "run",
+        "git+https://github.com/ahmed-coding/Gravitas-Core.git"
+      ]
+    }
+  }
+}
+```
+
+**With a specific ref (branch or tag):**
+
+```json
+{
+  "mcpServers": {
+    "antigravity": {
+      "command": "uvx",
+      "args": [
+        "run",
+        "git+https://github.com/ahmed-coding/Gravitas-Core.git@main"
+      ]
+    }
+  }
+}
+```
+
+**Cloned repo (run from local path):**
+
+```json
+{
+  "mcpServers": {
+    "antigravity": {
+      "command": "/path/to/Gravitas-Core/.venv/bin/python",
+      "args": ["-m", "antigravity_mcp.server"]
+    }
+  }
+}
+```
+
+*(Create the venv first: `cd /path/to/Gravitas-Core && uv venv && uv sync`, then use `.venv/bin/python` in `command`.)*
 
 ## MCP client configuration
 

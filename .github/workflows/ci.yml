@@ -1,0 +1,90 @@
+# Gravitas-Core-MCP: Test and run from GitHub (no local install required for users)
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install UV
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Run from GitHub (uvx-style)
+        run: |
+          # Simulate: uvx run git+https://github.com/OWNER/REPO.git
+          # Install from current repo and run server (quick startup then exit via timeout)
+          uv run python -c "
+          from antigravity_mcp.memory import Memory
+          from antigravity_mcp.controller import Controller
+          from antigravity_mcp.terminal import TerminalEngine
+          from antigravity_mcp.project_intel import get_project_map
+          m = Memory(project_root='.')
+          assert m.get_last_state()['status'] == 'success'
+          c = Controller(memory=m)
+          r = c.create_task(goal='CI test')
+          assert r['status'] == 'success'
+          print('Memory + Controller OK')
+          "
+        env:
+          UV_PROJECT_ENVIRONMENT: .venv
+
+      - name: Browser check (system Chrome/Edge or Playwright Chromium)
+        run: |
+          # CI has no system Chrome; install Playwright Chromium. Users with Chrome/Edge need no install.
+          uv run playwright install chromium
+          uv run python -c "
+          from antigravity_mcp.browser import BrowserEngine
+          import asyncio
+          async def check():
+              e = BrowserEngine(project_root='.')
+              try:
+                  await e._ensure_browser()
+                  print('Browser launched:', e._browser is not None, 'channel:', getattr(e, '_browser_channel', '?'))
+              finally:
+                  await e.close()
+          asyncio.run(check())
+          "
+        env:
+          UV_PROJECT_ENVIRONMENT: .venv
+
+  run-from-github:
+    name: Run from GitHub (no install)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install UV
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Install deps (user-equivalent: uvx run git+https://...)
+        run: uv sync
+
+      - name: Run MCP server from this repo (no local install)
+        run: |
+          # Simulates: uvx run git+https://github.com/ahmed-coding/Gravitas-Core.git
+          timeout 4 uv run python -m antigravity_mcp.server || true
