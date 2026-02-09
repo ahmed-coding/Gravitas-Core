@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from mcp import types
-from mcp.server.lowlevel import Server
+from mcp.server import Server
 from mcp.server.stdio import stdio_server
 
 from .browser import BrowserEngine
@@ -50,6 +50,7 @@ app = Server("Gravitas-Core-MCP")
 
 @app.list_tools()
 async def list_tools() -> list[types.Tool]:
+    print("Listing tools...")
     return [
         types.Tool(
             name="get_last_state",
@@ -240,6 +241,7 @@ async def list_tools() -> list[types.Tool]:
 @app.call_tool()
 async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.ContentBlock]:
     args = arguments or {}
+    print(f"Tool called: {name} with arguments: {args}")
     result: dict[str, Any]
     try:
         if name == "get_last_state":
@@ -373,6 +375,7 @@ def _build_model_resume_package(memory: Memory, controller: Controller, task_id:
 
 def main() -> int:
     """Entrypoint for uvx / Gravitas-Core-MCP."""
+    print("Starting Gravitas-Core-MCP server...")
     anyio.run(run_stdio)
     return 0
 

@@ -135,6 +135,12 @@ uv sync
 cd /path/to/Gravitas-Core
 uv run python -m antigravity_mcp.server
 ```
+**OR with uvicorn**
+
+```bash
+cd /path/to/Gravitas-Core
+uvicorn antigravity_mcp.mcp_webapp:starlette_app
+```
 
 The server uses stdio; your MCP client (Cursor, etc.) will start it automatically when configured.
 
@@ -177,10 +183,10 @@ Replace `/path/to/Gravitas-Core` with your actual clone path.
 
 ## Troubleshooting
 
-| Error | Fix |
-|-------|-----|
-| **`spawn uvx ENOENT`** | Cursor can’t find `uvx`. Either install [UV](https://docs.astral.sh/uv/) and ensure `uvx` is in your PATH, or **use localhost**: open this repo in Cursor (so it uses the project’s `.cursor/mcp.json`) and run `python3 -m venv .venv && .venv/bin/pip install -e .` in the project folder. The project config uses the venv’s Python, so no uv needed. |
-| **Server not starting** | Ensure `.venv` exists: from the project root run `python3 -m venv .venv` then `.venv/bin/pip install -e .` (or `uv sync` if you have uv). |
+| Error                   | Fix                                                                                                                                                                                                                                                                                                                                                      |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`spawn uvx ENOENT`**  | Cursor can’t find `uvx`. Either install [UV](https://docs.astral.sh/uv/) and ensure `uvx` is in your PATH, or **use localhost**: open this repo in Cursor (so it uses the project’s `.cursor/mcp.json`) and run `python3 -m venv .venv && .venv/bin/pip install -e .` in the project folder. The project config uses the venv’s Python, so no uv needed. |
+| **Server not starting** | Ensure `.venv` exists: from the project root run `python3 -m venv .venv` then `.venv/bin/pip install -e .` (or `uv sync` if you have uv).                                                                                                                                                                                                                |
 
 ## MCP client configuration
 
@@ -240,19 +246,19 @@ All tools return deterministic JSON:
 
 ## Mandatory tools (PRD)
 
-| Tool | Description |
-|------|-------------|
-| `get_last_state` | Last known state (snapshot + active task) |
-| `get_canonical_state` | Last verified immutable state (rollback/recovery) |
-| `record_failure` | Record failed strategy/command |
-| `resume_task` | Load task context for resumption |
-| `controller_create_task` | Create task, state PLANNING |
-| `controller_transition` | Move task to PLANNING/CODING/EXECUTING/VERIFYING/FAILED_RETRY/ROLLBACK/COMPLETED |
-| `controller_record_step_failure` | Record step failure (may trigger rollback) |
-| `terminal_execute` | Run shell command with timeout |
-| `browser_navigate` / `browser_snapshot` / `browser_screenshot` | UI verification |
-| `project_get_map` | Project structure with noise filtering |
-| `get_model_resume_package` | Model handover package |
+| Tool                                                           | Description                                                                      |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `get_last_state`                                               | Last known state (snapshot + active task)                                        |
+| `get_canonical_state`                                          | Last verified immutable state (rollback/recovery)                                |
+| `record_failure`                                               | Record failed strategy/command                                                   |
+| `resume_task`                                                  | Load task context for resumption                                                 |
+| `controller_create_task`                                       | Create task, state PLANNING                                                      |
+| `controller_transition`                                        | Move task to PLANNING/CODING/EXECUTING/VERIFYING/FAILED_RETRY/ROLLBACK/COMPLETED |
+| `controller_record_step_failure`                               | Record step failure (may trigger rollback)                                       |
+| `terminal_execute`                                             | Run shell command with timeout                                                   |
+| `browser_navigate` / `browser_snapshot` / `browser_screenshot` | UI verification                                                                  |
+| `project_get_map`                                              | Project structure with noise filtering                                           |
+| `get_model_resume_package`                                     | Model handover package                                                           |
 
 ## Brain database
 
