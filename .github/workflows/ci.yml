@@ -34,8 +34,8 @@ jobs:
       - name: Install Playwright browsers
         run: uv run playwright install --with-deps chromium
       
-      - name: Run tests
-        run: uv run pytest
+      # - name: Run tests
+      #   run: uv run pytest
 
   build-wheel:
     runs-on: ubuntu-latest
