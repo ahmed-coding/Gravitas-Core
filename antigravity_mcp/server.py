@@ -37,208 +37,211 @@ def _content(text: str) -> list[types.ContentBlock]:
     return [types.TextContent(type="text", text=text)]
 
 
-async def _run_server() -> None:
-    root = _detect_project_root()
-    memory = Memory(project_root=root)
-    controller = Controller(memory=memory)
-    terminal = TerminalEngine(project_root=root)
-    browser = BrowserEngine(project_root=root)
+# Global Infrastructure
+root = _detect_project_root()
+memory = Memory(project_root=root)
+controller = Controller(memory=memory)
+terminal = TerminalEngine(project_root=root)
+browser = BrowserEngine(project_root=root)
 
-    app = Server("Gravitas-Core-MCP")
+# MCP Server Definition
+app = Server("Gravitas-Core-MCP")
 
-    @app.list_tools()
-    async def list_tools() -> list[types.Tool]:
-        return [
-            types.Tool(
-                name="get_last_state",
-                description="Return the last known state (most recent snapshot + active task). Authoritative memory.",
-                input_schema={"type": "object", "properties": {}, "required": []},
-            ),
-            types.Tool(
-                name="get_canonical_state",
-                description="Return the last verified, immutable working state for rollback/recovery.",
-                input_schema={"type": "object", "properties": {}, "required": []},
-            ),
-            types.Tool(
-                name="record_failure",
-                description="Record a failed strategy/command to prevent repetition.",
-                input_schema={
-                    "type": "object",
-                    "properties": {
-                        "reason": {"type": "string", "description": "Failure reason"},
-                        "context": {"type": "object", "description": "Context (e.g. task_id, command)"},
-                    },
-                    "required": ["reason", "context"],
-                },
-            ),
-            types.Tool(
-                name="resume_task",
-                description="Load task and its context for resumption (model handover/restart).",
-                input_schema={
-                    "type": "object",
-                    "properties": {"task_id": {"type": "string", "description": "Task ID"}},
-                    "required": ["task_id"],
-                },
-            ),
-            types.Tool(
-                name="controller_create_task",
-                description="Create a new task and set state to PLANNING.",
-                input_schema={
-                    "type": "object",
-                    "properties": {
-                        "goal": {"type": "string", "description": "Task goal"},
-                        "task_id": {"type": "string", "description": "Optional task ID"},
-                    },
-                    "required": ["goal"],
-                },
-            ),
-            types.Tool(
-                name="controller_transition",
-                description="Transition task to a new state (PLANNING, CODING, EXECUTING, VERIFYING, FAILED_RETRY, ROLLBACK, COMPLETED).",
-                input_schema={
-                    "type": "object",
-                    "properties": {
-                        "task_id": {"type": "string"},
-                        "new_state": {"type": "string"},
-                    },
-                    "required": ["task_id", "new_state"],
-                },
-            ),
-            types.Tool(
-                name="controller_record_step_failure",
-                description="Record a step failure; may trigger FAILED_RETRY or ROLLBACK.",
-                input_schema={
-                    "type": "object",
-                    "properties": {"task_id": {"type": "string"}, "reason": {"type": "string"}},
-                    "required": ["task_id", "reason"],
-                },
-            ),
-            types.Tool(
-                name="controller_get_state",
-                description="Return current task state and policy info.",
-                input_schema={
-                    "type": "object",
-                    "properties": {"task_id": {"type": "string"}},
-                    "required": ["task_id"],
-                },
-            ),
-            types.Tool(
-                name="terminal_execute",
-                description="Execute a shell command with timeout and cwd. Returns stdout, stderr, exit_code.",
-                input_schema={
-                    "type": "object",
-                    "properties": {
-                        "command": {"type": "string"},
-                        "cwd": {"type": "string"},
-                        "timeout_sec": {"type": "integer"},
-                    },
-                    "required": ["command"],
-                },
-            ),
-            types.Tool(
-                name="terminal_start_background",
-                description="Start a background process; use process_id to stop later.",
-                input_schema={
-                    "type": "object",
-                    "properties": {
-                        "command": {"type": "string"},
-                        "process_id": {"type": "string"},
-                        "cwd": {"type": "string"},
-                    },
-                    "required": ["command", "process_id"],
-                },
-            ),
-            types.Tool(
-                name="terminal_stop_background",
-                description="Terminate a background process by process_id.",
-                input_schema={
-                    "type": "object",
-                    "properties": {"process_id": {"type": "string"}},
-                    "required": ["process_id"],
-                },
-            ),
-            types.Tool(
-                name="terminal_list_background",
-                description="List active background process ids.",
-                input_schema={"type": "object", "properties": {}, "required": []},
-            ),
-            types.Tool(
-                name="browser_navigate",
-                description="Navigate to URL (Playwright).",
-                input_schema={
-                    "type": "object",
-                    "properties": {"url": {"type": "string"}, "wait_until": {"type": "string"}},
-                    "required": ["url"],
-                },
-            ),
-            types.Tool(
-                name="browser_snapshot",
-                description="Capture DOM accessibility tree and console errors.",
-                input_schema={"type": "object", "properties": {}, "required": []},
-            ),
-            types.Tool(
-                name="browser_screenshot",
-                description="Take screenshot; optional path to save file.",
-                input_schema={
-                    "type": "object",
-                    "properties": {"path": {"type": "string"}},
-                    "required": [],
-                },
-            ),
-            types.Tool(
-                name="browser_get_console_errors",
-                description="Return collected JS console errors since last navigate.",
-                input_schema={"type": "object", "properties": {}, "required": []},
-            ),
-            types.Tool(
-                name="project_get_map",
-                description="Recursive project structure with noise filtering.",
-                input_schema={
-                    "type": "object",
-                    "properties": {"project_root": {"type": "string"}, "max_depth": {"type": "integer"}, "max_entries": {"type": "integer"}},
-                    "required": [],
-                },
-            ),
-            types.Tool(
-                name="memory_save_snapshot",
-                description="Save a context snapshot for current task (internal use).",
-                input_schema={
-                    "type": "object",
-                    "properties": {
-                        "snapshot_id": {"type": "string"},
-                        "task_id": {"type": "string"},
-                        "project_map": {"type": "object"},
-                        "safe_to_edit": {"type": "array", "items": {"type": "string"}},
-                        "do_not_touch": {"type": "array", "items": {"type": "string"}},
-                    },
-                    "required": ["snapshot_id", "task_id", "project_map", "safe_to_edit", "do_not_touch"],
-                },
-            ),
-            types.Tool(
-                name="memory_set_canonical",
-                description="Set the canonical (immutable) state to a snapshot (after verification).",
-                input_schema={
-                    "type": "object",
-                    "properties": {"snapshot_id": {"type": "string"}},
-                    "required": ["snapshot_id"],
-                },
-            ),
-            types.Tool(
-                name="get_model_resume_package",
-                description="Generate Model Resume Package for model swap/editor restart/crash recovery: goal, task, constraints, failures, safe/do-not-touch files.",
-                input_schema={
-                    "type": "object",
-                    "properties": {"task_id": {"type": "string"}},
-                    "required": [],
-                },
-            ),
-        ]
 
-    @app.call_tool()
-    async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.ContentBlock]:
-        args = arguments or {}
-        result: dict[str, Any]
+@app.list_tools()
+async def list_tools() -> list[types.Tool]:
+    return [
+        types.Tool(
+            name="get_last_state",
+            description="Return the last known state (most recent snapshot + active task). Authoritative memory.",
+            input_schema={"type": "object", "properties": {}, "required": []},
+        ),
+        types.Tool(
+            name="get_canonical_state",
+            description="Return the last verified, immutable working state for rollback/recovery.",
+            input_schema={"type": "object", "properties": {}, "required": []},
+        ),
+        types.Tool(
+            name="record_failure",
+            description="Record a failed strategy/command to prevent repetition.",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "reason": {"type": "string", "description": "Failure reason"},
+                    "context": {"type": "object", "description": "Context (e.g. task_id, command)"},
+                },
+                "required": ["reason", "context"],
+            },
+        ),
+        types.Tool(
+            name="resume_task",
+            description="Load task and its context for resumption (model handover/restart).",
+            input_schema={
+                "type": "object",
+                "properties": {"task_id": {"type": "string", "description": "Task ID"}},
+                "required": ["task_id"],
+            },
+        ),
+        types.Tool(
+            name="controller_create_task",
+            description="Create a new task and set state to PLANNING.",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "goal": {"type": "string", "description": "Task goal"},
+                    "task_id": {"type": "string", "description": "Optional task ID"},
+                },
+                "required": ["goal"],
+            },
+        ),
+        types.Tool(
+            name="controller_transition",
+            description="Transition task to a new state (PLANNING, CODING, EXECUTING, VERIFYING, FAILED_RETRY, ROLLBACK, COMPLETED).",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "task_id": {"type": "string"},
+                    "new_state": {"type": "string"},
+                },
+                "required": ["task_id", "new_state"],
+            },
+        ),
+        types.Tool(
+            name="controller_record_step_failure",
+            description="Record a step failure; may trigger FAILED_RETRY or ROLLBACK.",
+            input_schema={
+                "type": "object",
+                "properties": {"task_id": {"type": "string"}, "reason": {"type": "string"}},
+                "required": ["task_id", "reason"],
+            },
+        ),
+        types.Tool(
+            name="controller_get_state",
+            description="Return current task state and policy info.",
+            input_schema={
+                "type": "object",
+                "properties": {"task_id": {"type": "string"}},
+                "required": ["task_id"],
+            },
+        ),
+        types.Tool(
+            name="terminal_execute",
+            description="Execute a shell command with timeout and cwd. Returns stdout, stderr, exit_code.",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "command": {"type": "string"},
+                    "cwd": {"type": "string"},
+                    "timeout_sec": {"type": "integer"},
+                },
+                "required": ["command"],
+            },
+        ),
+        types.Tool(
+            name="terminal_start_background",
+            description="Start a background process; use process_id to stop later.",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "command": {"type": "string"},
+                    "process_id": {"type": "string"},
+                    "cwd": {"type": "string"},
+                },
+                "required": ["command", "process_id"],
+            },
+        ),
+        types.Tool(
+            name="terminal_stop_background",
+            description="Terminate a background process by process_id.",
+            input_schema={
+                "type": "object",
+                "properties": {"process_id": {"type": "string"}},
+                "required": ["process_id"],
+            },
+        ),
+        types.Tool(
+            name="terminal_list_background",
+            description="List active background process ids.",
+            input_schema={"type": "object", "properties": {}, "required": []},
+        ),
+        types.Tool(
+            name="browser_navigate",
+            description="Navigate to URL (Playwright).",
+            input_schema={
+                "type": "object",
+                "properties": {"url": {"type": "string"}, "wait_until": {"type": "string"}},
+                "required": ["url"],
+            },
+        ),
+        types.Tool(
+            name="browser_snapshot",
+            description="Capture DOM accessibility tree and console errors.",
+            input_schema={"type": "object", "properties": {}, "required": []},
+        ),
+        types.Tool(
+            name="browser_screenshot",
+            description="Take screenshot; optional path to save file.",
+            input_schema={
+                "type": "object",
+                "properties": {"path": {"type": "string"}},
+                "required": [],
+            },
+        ),
+        types.Tool(
+            name="browser_get_console_errors",
+            description="Return collected JS console errors since last navigate.",
+            input_schema={"type": "object", "properties": {}, "required": []},
+        ),
+        types.Tool(
+            name="project_get_map",
+            description="Recursive project structure with noise filtering.",
+            input_schema={
+                "type": "object",
+                "properties": {"project_root": {"type": "string"}, "max_depth": {"type": "integer"}, "max_entries": {"type": "integer"}},
+                "required": [],
+            },
+        ),
+        types.Tool(
+            name="memory_save_snapshot",
+            description="Save a context snapshot for current task (internal use).",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "snapshot_id": {"type": "string"},
+                    "task_id": {"type": "string"},
+                    "project_map": {"type": "object"},
+                    "safe_to_edit": {"type": "array", "items": {"type": "string"}},
+                    "do_not_touch": {"type": "array", "items": {"type": "string"}},
+                },
+                "required": ["snapshot_id", "task_id", "project_map", "safe_to_edit", "do_not_touch"],
+            },
+        ),
+        types.Tool(
+            name="memory_set_canonical",
+            description="Set the canonical (immutable) state to a snapshot (after verification).",
+            input_schema={
+                "type": "object",
+                "properties": {"snapshot_id": {"type": "string"}},
+                "required": ["snapshot_id"],
+            },
+        ),
+        types.Tool(
+            name="get_model_resume_package",
+            description="Generate Model Resume Package for model swap/editor restart/crash recovery: goal, task, constraints, failures, safe/do-not-touch files.",
+            input_schema={
+                "type": "object",
+                "properties": {"task_id": {"type": "string"}},
+                "required": [],
+            },
+        ),
+    ]
 
+
+@app.call_tool()
+async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.ContentBlock]:
+    args = arguments or {}
+    result: dict[str, Any]
+    try:
         if name == "get_last_state":
             result = memory.get_last_state()
         elif name == "get_canonical_state":
@@ -312,11 +315,14 @@ async def _run_server() -> None:
         elif name == "get_model_resume_package":
             result = _build_model_resume_package(memory, controller, args.get("task_id"))
         else:
-            from .memory import _tool_result as tr
-            result = tr("failure", errors=[f"Unknown tool: {name}"], next_recommended_action="Use list_tools.")
-
+            result = {"status": "error", "message": f"Unknown tool: {name}"}
         return _content(json.dumps(result, default=str))
+    except Exception as e:
+        return _content(json.dumps({"status": "error", "message": str(e)}))
 
+
+async def run_stdio():
+    """Run via standard I/O (local)."""
     async with stdio_server() as (read_stream, write_stream):
         await app.run(read_stream, write_stream, app.create_initialization_options())
 
@@ -367,9 +373,10 @@ def _build_model_resume_package(memory: Memory, controller: Controller, task_id:
 
 def main() -> int:
     """Entrypoint for uvx / Gravitas-Core-MCP."""
-    anyio.run(_run_server)
+    anyio.run(run_stdio)
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
