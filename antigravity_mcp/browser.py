@@ -44,10 +44,10 @@ async def _launch_any_available_browser(playwright):
         try:
             if channel == "chromium":
                 # Playwright's bundled Chromium (may require: playwright install chromium)
-                browser = await pw.chromium.launch(headless=True)
+                browser = await pw.chromium.launch(headless=False)  # Visible browser
             else:
                 # System-installed browser (no extra install)
-                browser = await pw.chromium.launch(headless=True, channel=channel)
+                browser = await pw.chromium.launch(headless=False, channel=channel)  # Visible browser
             return browser, channel
         except Exception as e:
             last_error = e
@@ -184,3 +184,20 @@ class BrowserEngine:
             observations={"console_errors": list(self._console_errors), "url": self._page.url},
             next_recommended_action="Fix reported errors in code.",
         )
+
+    async def hover(self, selector: str) -> dict[str, Any]:
+        """Hover over an element by CSS selector."""
+        try:
+            await self._ensure_browser()
+            await self._page.hover(selector, timeout=30000)
+            return _tool_result(
+                "success",
+                observations={"selector": selector, "url": self._page.url},
+                next_recommended_action="Element hovered successfully.",
+            )
+        except Exception as e:
+            return _tool_result(
+                "failure",
+                errors=[str(e)],
+                next_recommended_action="Check selector and ensure page is loaded.",
+            )

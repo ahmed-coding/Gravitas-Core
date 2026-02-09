@@ -194,6 +194,15 @@ async def list_tools() -> list[types.Tool]:
             input_schema={"type": "object", "properties": {}, "required": []},
         ),
         types.Tool(
+            name="browser_hover",
+            description="Hover over an element by CSS selector.",
+            input_schema={
+                "type": "object",
+                "properties": {"selector": {"type": "string", "description": "CSS selector for element"}},
+                "required": ["selector"],
+            },
+        ),
+        types.Tool(
             name="project_get_map",
             description="Recursive project structure with noise filtering.",
             input_schema={
@@ -296,6 +305,8 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[types.ContentB
             result = await browser.screenshot(path=args.get("path"))
         elif name == "browser_get_console_errors":
             result = await browser.get_console_errors()
+        elif name == "browser_hover":
+            result = await browser.hover(args.get("selector", ""))
         elif name == "project_get_map":
             result = get_project_map(
                 project_root=args.get("project_root") or root,

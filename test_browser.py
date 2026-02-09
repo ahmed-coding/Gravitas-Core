@@ -22,7 +22,7 @@ async def test_browser():
         # Test 1: Navigate to a simple page
         print("\n[Test 1] Navigating to https://example.com...")
         result = await browser.navigate(
-            url="https://example.com",
+            url="http://localhost:3000/",
             wait_until="domcontentloaded"
         )
         print(f"Status: {result.get('status')}")
@@ -49,7 +49,12 @@ async def test_browser():
         print(f"Status: {screenshot_result.get('status')}")
         if screenshot_result.get('status') == 'success':
             print(f"Screenshot saved to: {screenshot_result.get('observations', {}).get('path')}")
-        
+
+        # Test 5: Hover over element
+        print("\n[Test 5] Hovering over heading...")
+        hover_result = await browser.hover("h1")
+        print(f"Status: {hover_result.get('status')}")
+
         print("\n" + "=" * 60)
         print("All browser tests passed!")
         print("=" * 60)
