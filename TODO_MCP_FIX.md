@@ -1,14 +1,30 @@
-# TODO: Fix MCP Server Connection Issues
+# TODO: MCP Server Fix & GitHub Workflow
 
-## Issues Identified:
-1. MCP API Version Mismatch (v0.x code with v1.x dependency)
-2. SSE Transport incompatibility with MCP v1.x
-3. Server not added to Blackbox MCP settings
+## Issues Fixed:
+1. **MCP Import Path Fixed** - Updated from v0.x to v1.x API
+2. **Visible Browser Window** - Browser now opens in visible mode
+3. **Mouse Hover Added** - New `browser_hover` tool for element interaction
+4. **GitHub Workflow Created** - CI/CD for building, testing, and publishing
 
-## Completed Fixes:
-- [x] 1. Check installed MCP version and API patterns
-- [x] 2. Update `antigravity_mcp/server.py` - Migrate to MCP v1.x API
-- [x] 3. Update `antigravity_mcp/mcp_webapp.py` - Fix SSE transport for v1.x
-- [x] 4. Add server to Blackbox MCP settings
-- [x] 5. Test the connection
+## Files Modified:
+- `antigravity_mcp/server.py` - Fixed MCP import, added browser_hover handler
+- `antigravity_mcp/browser.py` - Visible browser, added hover method
+- `pyproject.toml` - Updated dependencies, added sdist config
+- `.github/workflows/ci.yml` - New CI/CD workflow
+- `README.md` - Added Blackbox/Cursor config examples
+
+## GitHub Import Format:
+```json
+{
+  "mcpServers": {
+    "gravitas-mcp": {
+      "command": "uvx",
+      "args": [
+        "run",
+        "git+https://github.com/ahmed-coding/Gravitas-Core.git"
+      ]
+    }
+  }
+}
+```
 

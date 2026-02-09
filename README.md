@@ -190,28 +190,71 @@ Replace `/path/to/Gravitas-Core` with your actual clone path.
 
 ## MCP client configuration
 
-### Cursor
+### Blackbox / Cursor (user-level config)
 
-Add to Cursor MCP settings (e.g. `~/.cursor/mcp.json` or project `.cursor/mcp.json`):
+Add to `~/.config/Code/User/globalStorage/blackboxapp.blackboxagent/settings/blackbox_mcp_settings.json`:
 
 ```json
 {
   "mcpServers": {
-    "antigravity": {
+    "gravitas-mcp": {
+      "command": "uvx",
+      "args": [
+        "run",
+        "git+https://github.com/ahmed-coding/Gravitas-Core.git"
+      ]
+    }
+  }
+}
+```
+
+**With a specific ref (branch or tag):**
+
+```json
+{
+  "mcpServers": {
+    "gravitas-mcp": {
+      "command": "uvx",
+      "args": [
+        "run",
+        "git+https://github.com/ahmed-coding/Gravitas-Core.git@v1.1.0"
+      ]
+    }
+  }
+}
+```
+
+**From local clone:**
+
+```json
+{
+  "mcpServers": {
+    "gravitas-mcp": {
+      "command": "/path/to/Gravitas-Core/.venv/bin/python",
+      "args": ["-m", "antigravity_mcp.server"],
+      "env": {
+        "PYTHONPATH": "/path/to/Gravitas-Core"
+      },
+      "type": "stdio"
+    }
+  }
+}
+```
+
+### Cursor (project-level config)
+
+Add to `.cursor/mcp.json` or `.vscode/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "gravitas-mcp": {
       "command": "uvx",
       "args": ["Gravitas-Core-MCP"]
     }
   }
 }
 ```
-
-### VS Code (Cline / Claude Dev)
-
-Use the same `mcpServers` block in your MCP config; point `command` to `uvx` and `args` to `["Gravitas-Core-MCP"]`.
-
-### Claude Desktop
-
-In Claude Desktop config, add the `antigravity` server with `uvx` and `Gravitas-Core-MCP` as above.
 
 ## Repository structure
 

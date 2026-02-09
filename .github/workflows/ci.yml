@@ -1,90 +1,94 @@
-# Gravitas-Core-MCP: Test and run from GitHub (no local install required for users)
-name: CI
+name: Build, Test & Release Gravitas MCP Server
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
+    tags: ['v*']
   pull_request:
-    branches: [main, master]
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   test:
-    name: Test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install UV
+      
+      - name: Set up uv
         uses: astral-sh/setup-uv@v4
         with:
-          version: "latest"
-
+          enable-cache: true
+      
+      - name: Set Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+      
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync
+      
+      - name: Install Playwright browsers
+        run: uv run playwright install --with-deps chromium
+      
+      - name: Run tests
+        run: uv run pytest
 
-      - name: Run from GitHub (uvx-style)
-        run: |
-          # Simulate: uvx run git+https://github.com/OWNER/REPO.git
-          # Install from current repo and run server (quick startup then exit via timeout)
-          uv run python -c "
-          from antigravity_mcp.memory import Memory
-          from antigravity_mcp.controller import Controller
-          from antigravity_mcp.terminal import TerminalEngine
-          from antigravity_mcp.project_intel import get_project_map
-          m = Memory(project_root='.')
-          assert m.get_last_state()['status'] == 'success'
-          c = Controller(memory=m)
-          r = c.create_task(goal='CI test')
-          assert r['status'] == 'success'
-          print('Memory + Controller OK')
-          "
-        env:
-          UV_PROJECT_ENVIRONMENT: .venv
-
-      - name: Browser check (system Chrome/Edge or Playwright Chromium)
-        run: |
-          # CI has no system Chrome; install Playwright Chromium. Users with Chrome/Edge need no install.
-          uv run playwright install chromium
-          uv run python -c "
-          from antigravity_mcp.browser import BrowserEngine
-          import asyncio
-          async def check():
-              e = BrowserEngine(project_root='.')
-              try:
-                  await e._ensure_browser()
-                  print('Browser launched:', e._browser is not None, 'channel:', getattr(e, '_browser_channel', '?'))
-              finally:
-                  await e.close()
-          asyncio.run(check())
-          "
-        env:
-          UV_PROJECT_ENVIRONMENT: .venv
-
-  run-from-github:
-    name: Run from GitHub (no install)
+  build-wheel:
     runs-on: ubuntu-latest
+    needs: test
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install UV
+      
+      - name: Set up uv
         uses: astral-sh/setup-uv@v4
         with:
-          version: "latest"
+          enable-cache: true
+      
+      - name: Build wheel
+        run: uv build
+      
+      - name: Upload wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      
+      - name: Upload to Test PyPI
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
 
-      - name: Install deps (user-equivalent: uvx run git+https://...)
-        run: uv sync
+  publish-pypi:
+    runs-on: ubuntu-latest
+    needs: build-wheel
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
 
-      - name: Run MCP server from this repo (no local install)
-        run: |
-          # Simulates: uvx run git+https://github.com/ahmed-coding/Gravitas-Core.git
-          timeout 4 uv run python -m antigravity_mcp.server || true
+  create-release:
+    runs-on: ubuntu-latest
+    needs: publish-pypi
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
