@@ -1,6 +1,6 @@
 [project]
 name = "Gravitas-Core-MCP"
-version = "1.0.0"
+version = "0.1.0"
 description = "Production-grade autonomous MCP server: persistent memory, cognitive control, terminal & browser verification"
 readme = "README.md"
 requires-python = ">=3.10"
