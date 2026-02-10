@@ -54,3 +54,4 @@ Thumbs.db
 *.local
 .cursor/mcp.json
 *.png
+.gravitas_brain.db
