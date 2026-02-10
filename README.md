@@ -1,6 +1,6 @@
 # Gravitas-Core-MCP
 
-**Version:** 1.1.0  
+**Version:** 1.0.0  
 **Role:** Core System Blueprint / Autonomous AI Control Plane  
 **Target Platforms:** VS Code (Cline / Claude Dev), Cursor, Windsurf, Claude Desktop
 
