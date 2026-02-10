@@ -55,17 +55,17 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="get_last_state",
             description="Return the last known state (most recent snapshot + active task). Authoritative memory.",
-            input_schema={"type": "object", "properties": {}, "required": []},
+            inputSchema={"type": "object", "properties": {}},
         ),
         types.Tool(
             name="get_canonical_state",
             description="Return the last verified, immutable working state for rollback/recovery.",
-            input_schema={"type": "object", "properties": {}, "required": []},
+            inputSchema={"type": "object", "properties": {}},
         ),
         types.Tool(
             name="record_failure",
             description="Record a failed strategy/command to prevent repetition.",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {
                     "reason": {"type": "string", "description": "Failure reason"},
@@ -77,7 +77,7 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="resume_task",
             description="Load task and its context for resumption (model handover/restart).",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {"task_id": {"type": "string", "description": "Task ID"}},
                 "required": ["task_id"],
@@ -86,7 +86,7 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="controller_create_task",
             description="Create a new task and set state to PLANNING.",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {
                     "goal": {"type": "string", "description": "Task goal"},
@@ -98,7 +98,7 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="controller_transition",
             description="Transition task to a new state (PLANNING, CODING, EXECUTING, VERIFYING, FAILED_RETRY, ROLLBACK, COMPLETED).",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {
                     "task_id": {"type": "string"},
@@ -110,7 +110,7 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="controller_record_step_failure",
             description="Record a step failure; may trigger FAILED_RETRY or ROLLBACK.",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {"task_id": {"type": "string"}, "reason": {"type": "string"}},
                 "required": ["task_id", "reason"],
@@ -119,7 +119,7 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="controller_get_state",
             description="Return current task state and policy info.",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {"task_id": {"type": "string"}},
                 "required": ["task_id"],
@@ -128,7 +128,7 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="terminal_execute",
             description="Execute a shell command with timeout and cwd. Returns stdout, stderr, exit_code.",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {
                     "command": {"type": "string"},
@@ -141,7 +141,7 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="terminal_start_background",
             description="Start a background process; use process_id to stop later.",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {
                     "command": {"type": "string"},
@@ -154,7 +154,7 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="terminal_stop_background",
             description="Terminate a background process by process_id.",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {"process_id": {"type": "string"}},
                 "required": ["process_id"],
@@ -163,12 +163,12 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="terminal_list_background",
             description="List active background process ids.",
-            input_schema={"type": "object", "properties": {}, "required": []},
+            inputSchema={"type": "object", "properties": {}},
         ),
         types.Tool(
             name="browser_navigate",
             description="Navigate to URL (Playwright).",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {"url": {"type": "string"}, "wait_until": {"type": "string"}},
                 "required": ["url"],
@@ -177,26 +177,25 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="browser_snapshot",
             description="Capture DOM accessibility tree and console errors.",
-            input_schema={"type": "object", "properties": {}, "required": []},
+            inputSchema={"type": "object", "properties": {}},
         ),
         types.Tool(
             name="browser_screenshot",
             description="Take screenshot; optional path to save file.",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {"path": {"type": "string"}},
-                "required": [],
             },
         ),
         types.Tool(
             name="browser_get_console_errors",
             description="Return collected JS console errors since last navigate.",
-            input_schema={"type": "object", "properties": {}, "required": []},
+            inputSchema={"type": "object", "properties": {}},
         ),
         types.Tool(
             name="browser_hover",
             description="Hover over an element by CSS selector.",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {"selector": {"type": "string", "description": "CSS selector for element"}},
                 "required": ["selector"],
@@ -205,16 +204,15 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="project_get_map",
             description="Recursive project structure with noise filtering.",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {"project_root": {"type": "string"}, "max_depth": {"type": "integer"}, "max_entries": {"type": "integer"}},
-                "required": [],
             },
         ),
         types.Tool(
             name="memory_save_snapshot",
             description="Save a context snapshot for current task (internal use).",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {
                     "snapshot_id": {"type": "string"},
@@ -229,7 +227,7 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="memory_set_canonical",
             description="Set the canonical (immutable) state to a snapshot (after verification).",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {"snapshot_id": {"type": "string"}},
                 "required": ["snapshot_id"],
@@ -238,10 +236,9 @@ async def list_tools() -> list[types.Tool]:
         types.Tool(
             name="get_model_resume_package",
             description="Generate Model Resume Package for model swap/editor restart/crash recovery: goal, task, constraints, failures, safe/do-not-touch files.",
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {"task_id": {"type": "string"}},
-                "required": [],
             },
         ),
     ]
