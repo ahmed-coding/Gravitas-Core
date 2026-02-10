@@ -23,7 +23,7 @@ wheels/
 *.egg
 
 # Gravitas brain DB (user data, optional to ignore or commit empty)
-# .antigravity_brain.db
+# .gravitas_brain.db
 
 # IDE
 .idea/

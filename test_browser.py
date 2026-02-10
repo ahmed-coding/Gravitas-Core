@@ -9,7 +9,7 @@ import sys
 import os
 sys.path.insert(0, '/home/ahmed/Desktop/Gravitas-MCP-Core')
 
-from antigravity_mcp.browser import BrowserEngine
+from gravitas_mcp.browser import BrowserEngine
 
 
 async def test_browser():

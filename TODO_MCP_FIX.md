@@ -7,8 +7,8 @@
 4. **GitHub Workflow Created** - CI/CD for building, testing, and publishing
 
 ## Files Modified:
-- `antigravity_mcp/server.py` - Fixed MCP import, added browser_hover handler
-- `antigravity_mcp/browser.py` - Visible browser, added hover method
+- `gravitas_mcp/server.py` - Fixed MCP import, added browser_hover handler
+- `gravitas_mcp/browser.py` - Visible browser, added hover method
 - `pyproject.toml` - Updated dependencies, added sdist config
 - `.github/workflows/ci.yml` - New CI/CD workflow
 - `README.md` - Added Blackbox/Cursor config examples

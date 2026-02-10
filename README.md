@@ -109,7 +109,7 @@ uvx run "git+https://github.com/ahmed-coding/Gravitas-Core.git@v1.1.0"
   "mcpServers": {
     "gravitas-mcp": {
       "command": "/path/to/Gravitas-Core/.venv/bin/python",
-      "args": ["-m", "antigravity_mcp.server"]
+      "args": ["-m", "gravitas_mcp.server"]
     }
   }
 }
@@ -135,13 +135,13 @@ uv sync
 
 ```bash
 cd /path/to/Gravitas-Core
-uv run python -m antigravity_mcp.server
+uv run python -m gravitas_mcp.server
 ```
 **OR with uvicorn**
 
 ```bash
 cd /path/to/Gravitas-Core
-uvicorn antigravity_mcp.mcp_webapp:starlette_app
+uvicorn gravitas_mcp.mcp_webapp:starlette_app
 ```
 
 The server uses stdio; your MCP client (Cursor, etc.) will start it automatically when configured.
@@ -149,7 +149,7 @@ The server uses stdio; your MCP client (Cursor, etc.) will start it automaticall
 ### 3. MCP config for localhost
 
 **Option A — Use this repo as the Cursor project (recommended)**  
-Open the `Gravitas-Core` folder in Cursor. The project already includes `.cursor/mcp.json` so the **antigravity** MCP server runs from your local clone (no GitHub needed).
+Open the `Gravitas-Core` folder in Cursor. The project already includes `.cursor/mcp.json` so the **gravitas** MCP server runs from your local clone (no GitHub needed).
 
 **Option B — Use from any project (user-level config)**  
 Copy this into `~/.cursor/mcp.json` and replace `YOUR_PATH` with the full path to your clone (e.g. `/home/ahmed/Desktop/Gravitas-MCP-Core` or `C:\Users\You\Gravitas-Core`):
@@ -159,13 +159,13 @@ Copy this into `~/.cursor/mcp.json` and replace `YOUR_PATH` with the full path t
   "mcpServers": {
     "gravitas-mcp": {
       "command": "YOUR_PATH/.venv/bin/python",
-      "args": ["-m", "antigravity_mcp.server"]
+      "args": ["-m", "gravitas_mcp.server"]
     }
   }
 }
 ```
 
-On Windows use `YOUR_PATH\\.venv\\Scripts\\python.exe` and `"args": ["-m", "antigravity_mcp.server"]`.
+On Windows use `YOUR_PATH\\.venv\\Scripts\\python.exe` and `"args": ["-m", "gravitas_mcp.server"]`.
 
 **Option C — Use `uv` with project path (no venv path)**  
 If Cursor runs the command with a fixed cwd, you can use:
@@ -175,7 +175,7 @@ If Cursor runs the command with a fixed cwd, you can use:
   "mcpServers": {
     "gravitas-mcp": {
       "command": "uv",
-      "args": ["run", "--project", "/path/to/Gravitas-Core", "python", "-m", "antigravity_mcp.server"]
+      "args": ["run", "--project", "/path/to/Gravitas-Core", "python", "-m", "gravitas_mcp.server"]
     }
   }
 }
@@ -235,7 +235,7 @@ Add to `~/.config/Code/User/globalStorage/blackboxapp.blackboxagent/settings/bla
   "mcpServers": {
     "gravitas-mcp": {
       "command": "/path/to/Gravitas-Core/.venv/bin/python",
-      "args": ["-m", "antigravity_mcp.server"],
+      "args": ["-m", "gravitas_mcp.server"],
       "env": {
         "PYTHONPATH": "/path/to/Gravitas-Core"
       },
@@ -264,7 +264,7 @@ Add to `.cursor/mcp.json` or `.vscode/mcp.json`:
 
 ```
 Gravitas-Core-MCP/
-├── antigravity_mcp/
+├── gravitas_mcp/
 │   ├── __init__.py
 │   ├── server.py      # MCP entrypoint, tool wiring
 │   ├── memory.py      # SQLite persistence, task ledger, state APIs
@@ -309,7 +309,7 @@ All tools return deterministic JSON:
 
 ## Brain database
 
-State is stored in `.antigravity_brain.db` in the project root (or cwd). Optional: add `.antigravity_brain.db` to `.gitignore` if you do not want to commit it.
+State is stored in `.gravitas_brain.db` in the project root (or cwd). Optional: add `.gravitas_brain.db` to `.gitignore` if you do not want to commit it.
 
 ## License
 

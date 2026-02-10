@@ -32,7 +32,7 @@ DEFAULT_IGNORE = {
     "htmlcov",
     ".eggs",
     "*.egg-info",
-    ".antigravity_brain.db",
+    ".gravitas_brain.db",
     ".DS_Store",
     "Thumbs.db",
 }

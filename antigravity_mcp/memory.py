@@ -15,7 +15,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-DB_NAME = ".antigravity_brain.db"
+DB_NAME = ".gravitas_brain.db"
 
 
 @dataclass

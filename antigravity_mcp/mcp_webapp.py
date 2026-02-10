@@ -4,7 +4,7 @@ from starlette.applications import Starlette
 from starlette.routing import Route, Mount
 from starlette.responses import Response
 from mcp.server.sse import SseServerTransport
-from antigravity_mcp.server import app as mcp_app
+from gravitas_mcp.server import app as mcp_app
 
 # Create SSE Transport with correct path
 sse = SseServerTransport("/messages/")
