@@ -19,7 +19,7 @@ from .memory import _tool_result
 _playwright = None
 
 # Order: try system Chrome/Edge first so no "playwright install chromium" is required
-_BROWSER_CHANNELS = ["chrome", "msedge", "chromium"]
+_BROWSER_CHANNELS = ["chrome", "msedge","firefox", "chromium"]
 
 
 def _get_playwright():
