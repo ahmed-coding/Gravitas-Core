@@ -53,3 +53,4 @@ Thumbs.db
 .env.local
 *.local
 .cursor/mcp.json
+*.png

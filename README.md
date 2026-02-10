@@ -73,11 +73,12 @@ uvx run "git+https://github.com/ahmed-coding/Gravitas-Core.git@v1.1.0"
 ```json
 {
   "mcpServers": {
-    "antigravity": {
+    "gravitas-mcp": {
       "command": "uvx",
       "args": [
-        "run",
-        "git+https://github.com/ahmed-coding/Gravitas-Core.git"
+        "--from",
+        "git+https://github.com/ahmed-coding/Gravitas-Core.git",
+        "Gravitas-Core-MCP"
       ]
     }
   }
@@ -89,11 +90,12 @@ uvx run "git+https://github.com/ahmed-coding/Gravitas-Core.git@v1.1.0"
 ```json
 {
   "mcpServers": {
-    "antigravity": {
+    "gravitas-mcp": {
       "command": "uvx",
       "args": [
-        "run",
-        "git+https://github.com/ahmed-coding/Gravitas-Core.git@main"
+        "--from",
+        "git+https://github.com/ahmed-coding/Gravitas-Core.git@main",
+         "Gravitas-Core-MCP"
       ]
     }
   }
@@ -105,7 +107,7 @@ uvx run "git+https://github.com/ahmed-coding/Gravitas-Core.git@v1.1.0"
 ```json
 {
   "mcpServers": {
-    "antigravity": {
+    "gravitas-mcp": {
       "command": "/path/to/Gravitas-Core/.venv/bin/python",
       "args": ["-m", "antigravity_mcp.server"]
     }
@@ -155,7 +157,7 @@ Copy this into `~/.cursor/mcp.json` and replace `YOUR_PATH` with the full path t
 ```json
 {
   "mcpServers": {
-    "antigravity": {
+    "gravitas-mcp": {
       "command": "YOUR_PATH/.venv/bin/python",
       "args": ["-m", "antigravity_mcp.server"]
     }
@@ -171,7 +173,7 @@ If Cursor runs the command with a fixed cwd, you can use:
 ```json
 {
   "mcpServers": {
-    "antigravity": {
+    "gravitas-mcp": {
       "command": "uv",
       "args": ["run", "--project", "/path/to/Gravitas-Core", "python", "-m", "antigravity_mcp.server"]
     }
@@ -200,8 +202,9 @@ Add to `~/.config/Code/User/globalStorage/blackboxapp.blackboxagent/settings/bla
     "gravitas-mcp": {
       "command": "uvx",
       "args": [
-        "run",
-        "git+https://github.com/ahmed-coding/Gravitas-Core.git"
+        "--from",
+        "git+https://github.com/ahmed-coding/Gravitas-Core.git",
+        "Gravitas-Core-MCP"
       ]
     }
   }
@@ -216,8 +219,9 @@ Add to `~/.config/Code/User/globalStorage/blackboxapp.blackboxagent/settings/bla
     "gravitas-mcp": {
       "command": "uvx",
       "args": [
-        "run",
-        "git+https://github.com/ahmed-coding/Gravitas-Core.git@v1.1.0"
+        "--from",
+        "git+https://github.com/ahmed-coding/Gravitas-Core.git@v1.1.0",
+        "Gravitas-Core-MCP"
       ]
     }
   }

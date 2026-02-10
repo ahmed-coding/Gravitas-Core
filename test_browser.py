@@ -6,6 +6,7 @@ Run this to test if the browser tools work.
 
 import asyncio
 import sys
+import os
 sys.path.insert(0, '/home/ahmed/Desktop/Gravitas-MCP-Core')
 
 from antigravity_mcp.browser import BrowserEngine
@@ -22,7 +23,7 @@ async def test_browser():
         # Test 1: Navigate to a simple page
         print("\n[Test 1] Navigating to https://example.com...")
         result = await browser.navigate(
-            url="http://localhost:3000/",
+            url="https://www.youtube.com/",
             wait_until="domcontentloaded"
         )
         print(f"Status: {result.get('status')}")
@@ -45,20 +46,20 @@ async def test_browser():
         
         # Test 4: Screenshot
         print("\n[Test 4] Taking screenshot...")
-        screenshot_result = await browser.screenshot(path="/tmp/mcp_test_screenshot.png")
+        screenshot_result = await browser.screenshot(path="/home/ahmed/Desktop/Gravitas-MCP-Core/mcp_test_screenshot1.png")
         print(f"Status: {screenshot_result.get('status')}")
         if screenshot_result.get('status') == 'success':
             print(f"Screenshot saved to: {screenshot_result.get('observations', {}).get('path')}")
 
         # Test 5: Hover over element
         print("\n[Test 5] Hovering over heading...")
-        hover_result = await browser.hover("h1")
+        hover_result = await browser.hover("input")
         print(f"Status: {hover_result.get('status')}")
 
         print("\n" + "=" * 60)
         print("All browser tests passed!")
         print("=" * 60)
-        
+        os.wait()  # Keep browser open for a moment to review
     except Exception as e:
         print(f"\nERROR: {e}")
         import traceback
