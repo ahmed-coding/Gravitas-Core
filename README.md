@@ -141,7 +141,7 @@ uv run python -m gravitas_mcp.server
 
 ```bash
 cd /path/to/Gravitas-Core
-uvicorn gravitas_mcp.mcp_webapp:starlette_app
+uv run python -m  gravitas_mcp.mcp_webapp
 ```
 
 The server uses stdio; your MCP client (Cursor, etc.) will start it automatically when configured.
